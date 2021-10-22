@@ -359,7 +359,7 @@ impl Playground {
         std::thread::spawn(move || loop {
             {
                 let mut timer_in = data.lock().unwrap();
-                println!("timer {}", *timer_in);
+                // println!("timer {}", *timer_in);
                 *timer_in = match *timer_in {
                     usize::MAX => 0,
                     num => num + 1,
@@ -763,7 +763,7 @@ fn main() {
     std::thread::spawn(move || loop {
         {
             let mut timer_in = data.lock().unwrap();
-            println!("timer {}", *timer_in);
+            // println!("timer {}", *timer_in);
             *timer_in = match *timer_in {
                 usize::MAX => 0,
                 num => num + 1,
