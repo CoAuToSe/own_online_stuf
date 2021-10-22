@@ -3,6 +3,7 @@ use clap::Clap;
 use futures::executor::block_on;
 use notify::{RawEvent, RecommendedWatcher, Watcher};
 use std::{
+    self,
     borrow::Cow,
     fs::{read_to_string, OpenOptions},
     io::Write,
@@ -11,8 +12,10 @@ use std::{
     sync::mpsc::channel,
     thread::JoinHandle,
     time::{Instant, Duration},
+    *
 };
 use wgpu::{
+    self,
     util::{BufferInitDescriptor, DeviceExt},
     Adapter, Backends, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
     BindGroupLayoutEntry, BufferBindingType, BufferUsages, CommandEncoderDescriptor, Device,
@@ -20,6 +23,7 @@ use wgpu::{
     PrimitiveState, Queue, RenderPassColorAttachment, RenderPassDescriptor, RenderPipeline,
     RequestAdapterOptions, ShaderModule, ShaderSource, ShaderStages, Surface, SurfaceConfiguration,
     TextureFormat,
+    *
 };
 use wgpu_subscriber;
 use winit::{
