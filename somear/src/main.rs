@@ -97,7 +97,7 @@ struct Playground {
 
 impl Playground {
     fn reload(&mut self) {
-        // println!("Reload. {:?} {:?}", &self.watch_path, &self.flicker);
+        println!("Reload. {:?} {:?}", &self.watch_path, &self.flicker);
         self.flicker = match self.flicker {
             255 => 0,
             num => num + 1,
@@ -119,7 +119,7 @@ impl Playground {
             temp_pathbuf,
         ) {
             Ok(render_pipeline) => self.render_pipeline = render_pipeline,
-            Err(e) => (), //println!("{}", e),
+            Err(e) => println!("{}", e),
         }
         self.window.request_redraw();
     }
@@ -142,8 +142,8 @@ impl Playground {
                 }) => {
                     proxy.send_event(Reload).unwrap();
                 }
-                Ok(event) => (), //println!("broken event: {:?}", event),
-                Err(e) => (),    //println!("watch error: {:?}", e),
+                Ok(event) => println!("broken event: {:?}", event),
+                Err(e) => println!("watch error: {:?}", e),
             }
         }
     }
@@ -187,7 +187,7 @@ impl Playground {
             &self.watch_path,
         ) {
             Ok(render_pipeline) => self.render_pipeline = render_pipeline,
-            Err(e) => (), //println!("{}", e),
+            Err(e) => println!("{}", e),
         }
     }
 
@@ -306,7 +306,7 @@ impl Playground {
         ) {
             Ok(render_pipeline) => render_pipeline,
             Err(e) => {
-                // println!("Could not start due to error: {}", &e);
+                println!("Could not start due to error: {}", &e);
                 return;
             }
         };
@@ -359,7 +359,7 @@ impl Playground {
         std::thread::spawn(move || loop {
             {
                 let mut timer_in = data.lock().unwrap();
-                // println!("timer {}", *timer_in);
+                println!("timer {}", *timer_in);
                 *timer_in = match *timer_in {
                     usize::MAX => 0,
                     num => num + 1,
@@ -376,14 +376,14 @@ impl Playground {
                 let index_in = data.lock().unwrap();
                 let timer_in = data2.lock().unwrap();
                 let true_index_in = data3.lock().unwrap();
-                // println!(
-                //     "{} | {}: {} | {}: {}",
-                //     *timer_in,
-                //     *index_in,
-                //     *index_in / *timer_in,
-                //     *true_index_in,
-                //     *true_index_in / *timer_in,
-                // );
+                println!(
+                    "{} | {}: {} | {}: {}",
+                    *timer_in,
+                    *index_in,
+                    *index_in / *timer_in,
+                    *true_index_in,
+                    *true_index_in / *timer_in,
+                );
             }
             std::thread::sleep(std::time::Duration::new(0, 1_000_000_000));
         });
@@ -575,8 +575,8 @@ fn listen(watch_path: PathBuf, proxy: EventLoopProxy<CustomEvent>) {
             }) => {
                 proxy.send_event(CustomEvent::Reload).unwrap();
             }
-            Ok(event) => (), //println!("broken event: {:?}", event),
-            Err(e) => (),    //println!("watch error: {:?}", e),
+            Ok(event) => println!("broken event: {:?}", event),
+            Err(e) => println!("watch error: {:?}", e),
         }
     }
 }
@@ -709,7 +709,7 @@ fn main() {
     ) {
         Ok(render_pipeline) => render_pipeline,
         Err(e) => {
-            // println!("Could not start due to error: {}", &e);
+            println!("Could not start due to error: {}", &e);
             return;
         }
     };
@@ -763,7 +763,7 @@ fn main() {
     std::thread::spawn(move || loop {
         {
             let mut timer_in = data.lock().unwrap();
-            // println!("timer {}", *timer_in);
+            println!("timer {}", *timer_in);
             *timer_in = match *timer_in {
                 usize::MAX => 0,
                 num => num + 1,
@@ -780,14 +780,14 @@ fn main() {
             let index_in = data.lock().unwrap();
             let timer_in = data2.lock().unwrap();
             let true_index_in = data3.lock().unwrap();
-            // println!(
-            //     "{} | {}: {} | {}: {}",
-            //     *timer_in,
-            //     *index_in,
-            //     *index_in / *timer_in,
-            //     *true_index_in,
-            //     *true_index_in / *timer_in,
-            // );
+            println!(
+                "{} | {}: {} | {}: {}",
+                *timer_in,
+                *index_in,
+                *index_in / *timer_in,
+                *true_index_in,
+                *true_index_in / *timer_in,
+            );
         }
         std::thread::sleep(std::time::Duration::new(0, 1_000_000_000));
     });
