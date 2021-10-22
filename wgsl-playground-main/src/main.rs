@@ -295,8 +295,8 @@ impl Playground {
             format: swapchain_format,
             width: size.width,
             height: size.height,
-            // present_mode: wgpu::PresentMode::Mailbox, // Vsync or better (try 60fps or more if possible (overkill))
-            present_mode: wgpu::PresentMode::Fifo, // Vsync (try to have 60 fps)
+            present_mode: wgpu::PresentMode::Mailbox, // Vsync or better (try 60fps or more if possible (overkill))
+            // present_mode: wgpu::PresentMode::Fifo, // Vsync (try to have 60 fps)
         };
 
         surface.configure(&device, &surface_config);
@@ -312,7 +312,7 @@ impl Playground {
 
         let mut playground = Playground {
             watch_path: opts.wgsl_file.clone(),
-            watch_path2: "C:\\Users\\Aurélien\\Documents\\dev\\wgpu_stuf\\wgsl-playground-main\\examples\\circle.wgsl".into(),
+            watch_path2: "C:\\Users\\Aurel\\OneDrive\\Documents\\GitHub\\own_online_stuf\\wgsl-playground-main\\src\\somea.wgsl".into(),
             render_pipeline,
             window,
             device,
