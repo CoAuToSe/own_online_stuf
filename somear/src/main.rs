@@ -1,5 +1,5 @@
 #![allow(unused_variables)]
-#![windows_subsystem = "windows"] //remove the console when launched
+// #![windows_subsystem = "windows"] //remove the console when launched
 use clap::Parser;
 use futures::executor::block_on;
 use notify::{RawEvent, RecommendedWatcher, Watcher};
@@ -35,9 +35,12 @@ use winit::{
     *,
 };
 
+type Reload;
+
 #[derive(Debug)]
 enum CustomEvent<'a> {
     Som(winit::event::Event<'a, DeviceEvent>),
+    Reload,
     Non,
 }
 
@@ -554,190 +557,13 @@ fn main() {
             .ok();
     });
 
-    event_loop.run(move |event, something, control_flow| {
-        // println!("{:?} {:?} {:?}", event, something, control_flow);
-        match event 
-        {
-            // winit::event::Event::WindowEvent { ref event, .. } => match event {
-            //         WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-            //             playground.resize(new_inner_size)
-            //         }
-            //         _ => {}
-            //     },
-            //     winit::event::Event::RedrawRequested(_) => {
-            //         let data = std::sync::Arc::clone(&drawing);
-            //         let internal_drawing;
-            //         // println!("trying to draw!");
-            //         {
-            //             let mut is_drawing = data.lock().unwrap();
-            //             if !*is_drawing {
-            //                 // std::thread::sleep(std::time::Duration::new(0, 1_000_000));
-            //                 *is_drawing = true;
-            //                 internal_drawing = true;
-            //                 // println!("will draw!");
-            //                 let datai = std::sync::Arc::clone(&true_index);
-            //                 drawind_thread2 = std::thread::spawn(move || {
-            //                     let mut index_in = datai.lock().unwrap();
-            //                     *index_in = match *index_in {
-            //                         usize::MAX => 0,
-            //                         num => num + 1,
-            //                     };
-            //                 });
-            //             } else {
-            //                 internal_drawing = false;
-            //                 // println!("nice try!");
-            //             }
-            //         }
-            //         if !internal_drawing {
-            //             playground.uniforms.time = instant.elapsed().as_secs_f32();
-            //             queue.write_buffer(&uniforms_buffer, 0, playground.uniforms.as_bytes());
-            //             let output_frame = playground.surface.get_current_frame().unwrap();
-            //             let view = output_frame
-            //                 .output
-            //                 .texture
-            //                 .create_view(&wgpu::TextureViewDescriptor::default());
-
-            //             let mut encoder = playground
-            //                 .device
-            //                 .create_command_encoder(&CommandEncoderDescriptor { label: None });
-
-            //             {
-            //                 let mut render_pass =
-            //                     encoder.begin_render_pass(&RenderPassDescriptor {
-            //                         label: None,
-            //                         color_attachments: &[RenderPassColorAttachment {
-            //                             view: &view,
-            //                             resolve_target: None,
-            //                             ops: Operations {
-            //                                 load: LoadOp::Clear(wgpu::Color::BLACK),
-            //                                 store: true,
-            //                             },
-            //                         }],
-            //                         depth_stencil_attachment: None,
-            //                     });
-            //                 render_pass.set_pipeline(&playground.render_pipeline);
-            //                 render_pass.set_bind_group(0, &uniforms_buffer_bind_group, &[]);
-            //                 render_pass.draw(0..3, 0..1);
-            //             }
-
-            //             queue.submit(Some(encoder.finish()));
-            //             let data2 = std::sync::Arc::clone(&drawing);
-            //             drawind_thread = std::thread::spawn(move || {
-            //                 // std::thread::sleep(std::time::Duration::new(0, 500_000_000));
-            //                 let mut is_drawing2 = data2.lock().unwrap();
-            //                 *is_drawing2 = false;
-            //             });
-            //         }
-            //     }
-            //     winit::event::Event::UserEvent(Reload) => {
-            //         // println!("User Event");
-            //         playground.reload();
-            //     }
-            //     winit::event::Event::MainEventsCleared => {
-            //         let data = std::sync::Arc::clone(&index);
-            //         drawind_thread3 = std::thread::spawn(move || {
-            //             let mut index_in = data.lock().unwrap();
-            //             *index_in = match *index_in {
-            //                 usize::MAX => 0,
-            //                 num => num + 1,
-            //             };
-            //         });
-            //         // println!("Main Events Cleared");
-            //         playground.window.request_redraw();
-            //     }
-            //     _ => {}
-            // }
-            Event::NewEvents(some) => (),
-            Event::WindowEvent { window_id, event } => match event {
-                event::WindowEvent::Resized(new_size) => playground.resize(new_size),
-                event::WindowEvent::Moved(some) => (),
-                event::WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                event::WindowEvent::Destroyed => *control_flow = ControlFlow::Exit,
-                event::WindowEvent::DroppedFile(some) => (),
-                event::WindowEvent::HoveredFile(some) => (),
-                event::WindowEvent::HoveredFileCancelled => (),
-                event::WindowEvent::ReceivedCharacter(some) => (),
-                event::WindowEvent::Focused(some) => (),
-                event::WindowEvent::KeyboardInput {
-                    device_id,
-                    input,
-                    is_synthetic,
-                } => (),
-                event::WindowEvent::ModifiersChanged(some) => (),
-                event::WindowEvent::CursorMoved {
-                    device_id,
-                    position,
-                    modifiers,
-                } => {
-                        let size = playground.window.inner_size();
-                        let normalized_x = position.x as f32 / size.width as f32;
-                        let normalized_y = position.y as f32 / size.height as f32;
-                        playground.uniforms.mouse =
-                            [normalized_x * 2. - 1., -normalized_y * 2. + 1.];
-                    },
-                event::WindowEvent::CursorEntered { device_id } => (),
-                event::WindowEvent::CursorLeft { device_id } => (),
-                event::WindowEvent::MouseWheel {
-                    device_id,
-                    delta,
-                    phase,
-                    modifiers,
-                } => (),
-                event::WindowEvent::MouseInput {
-                    device_id,
-                    state,
-                    button,
-                    modifiers,
-                } => (),
-                event::WindowEvent::TouchpadPressure {
-                    device_id,
-                    pressure,
-                    stage,
-                } => (),
-                event::WindowEvent::AxisMotion {
-                    device_id,
-                    axis,
-                    value,
-                } => (),
-                event::WindowEvent::Touch(some) => (),
-                event::WindowEvent::ScaleFactorChanged {
-                    scale_factor,
-                    new_inner_size,
-                } => 
-                        playground.resize(new_inner_size),
-                event::WindowEvent::ThemeChanged(some) => (),
-            },
-            Event::DeviceEvent { device_id, event } => match event {
-                DeviceEvent::Added => (),
-                DeviceEvent::Removed => (),
-                DeviceEvent::MouseMotion { delta } => (),
-                DeviceEvent::MouseWheel { delta } => (),
-                DeviceEvent::Motion { axis, value } => (),
-                DeviceEvent::Button { button, state } => (),
-                DeviceEvent::Key(some) => (),
-                DeviceEvent::Text { codepoint } => (),
-            },
-            Event::UserEvent(some) => (),
-            Event::Suspended => (),
-            Event::Resumed => (),
-            Event::MainEventsCleared => (),
-            Event::RedrawRequested(some) => (),
-            Event::RedrawEventsCleared => (),
-            Event::LoopDestroyed => (),
-        }
-        // *control_flow = ControlFlow::Poll;
-        *control_flow = ControlFlow::Wait;
-        // *control_flow = ControlFlow::WaitUntil(Instant::now() + Duration::from_millis(10000));
-        // *control_flow = ControlFlow::Exit;
-    });
-
     
-        let event_loop: EventLoop<Reload> = EventLoop::with_user_event();
+        // let event_loop: EventLoop<Reload> = EventLoop::with_user_event();
         let proxy = event_loop.create_proxy();
 
         let proxy2 = event_loop.create_proxy();
         std::thread::spawn(move || loop {
-            proxy2.send_event(Reload).unwrap();
+            proxy2.send_event(CustomEvent::Reload).unwrap();
             std::thread::sleep(std::time::Duration::new(5, 0));
         });
 
@@ -746,11 +572,11 @@ fn main() {
             std::thread::spawn(move || Self::listen(watch_path, proxy));
         }
 
-        let window = WindowBuilder::new()
-            .with_inner_size(PhysicalSize::new(600, 600))
-            .with_title("WGSL Playground")
-            .build(&event_loop)
-            .unwrap();
+        // let window = WindowBuilder::new()
+        //     .with_inner_size(PhysicalSize::new(600, 600))
+        //     .with_title("WGSL Playground")
+        //     .build(&event_loop)
+        //     .unwrap();
         let size = window.inner_size();
 
         window.set_always_on_top(opts.always_on_top);
@@ -884,12 +710,174 @@ fn main() {
             }
             std::thread::sleep(std::time::Duration::new(0, 1_000_000_000));
         });
+    event_loop.run(move |event, something, control_flow| {
+        // println!("{:?} {:?} {:?}", event, something, control_flow);
+        match event {
+            Event::NewEvents(some) => match some {
+                Reload => {
+                    // println!("User Event");
+                    playground.reload();
+                },
+                _ => ()
+            },
+            Event::WindowEvent { window_id, event } => match event {
+                event::WindowEvent::Resized(new_size) => playground.resize(new_size),
+                event::WindowEvent::Moved(some) => (),
+                event::WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                event::WindowEvent::Destroyed => *control_flow = ControlFlow::Exit,
+                event::WindowEvent::DroppedFile(some) => (),
+                event::WindowEvent::HoveredFile(some) => (),
+                event::WindowEvent::HoveredFileCancelled => (),
+                event::WindowEvent::ReceivedCharacter(some) => (),
+                event::WindowEvent::Focused(some) => (),
+                event::WindowEvent::KeyboardInput {
+                    device_id,
+                    input,
+                    is_synthetic,
+                } => (),
+                event::WindowEvent::ModifiersChanged(some) => (),
+                event::WindowEvent::CursorMoved {
+                    device_id,
+                    position,
+                    modifiers,
+                } => {
+                        let size = playground.window.inner_size();
+                        let normalized_x = position.x as f32 / size.width as f32;
+                        let normalized_y = position.y as f32 / size.height as f32;
+                        playground.uniforms.mouse =
+                            [normalized_x * 2. - 1., -normalized_y * 2. + 1.];
+                    },
+                event::WindowEvent::CursorEntered { device_id } => (),
+                event::WindowEvent::CursorLeft { device_id } => (),
+                event::WindowEvent::MouseWheel {
+                    device_id,
+                    delta,
+                    phase,
+                    modifiers,
+                } => (),
+                event::WindowEvent::MouseInput {
+                    device_id,
+                    state,
+                    button,
+                    modifiers,
+                } => (),
+                event::WindowEvent::TouchpadPressure {
+                    device_id,
+                    pressure,
+                    stage,
+                } => (),
+                event::WindowEvent::AxisMotion {
+                    device_id,
+                    axis,
+                    value,
+                } => (),
+                event::WindowEvent::Touch(some) => (),
+                event::WindowEvent::ScaleFactorChanged {
+                    scale_factor,
+                    new_inner_size,
+                } => 
+                        playground.resize(new_inner_size),
+                event::WindowEvent::ThemeChanged(some) => (),
+            },
+            Event::DeviceEvent { device_id, event } => match event {
+                DeviceEvent::Added => (),
+                DeviceEvent::Removed => (),
+                DeviceEvent::MouseMotion { delta } => (),
+                DeviceEvent::MouseWheel { delta } => (),
+                DeviceEvent::Motion { axis, value } => (),
+                DeviceEvent::Button { button, state } => (),
+                DeviceEvent::Key(some) => (),
+                DeviceEvent::Text { codepoint } => (),
+            },
+            Event::UserEvent(some) => (),
+            Event::Suspended => (),
+            Event::Resumed => (),
+            Event::MainEventsCleared => {}
+                    let data = std::sync::Arc::clone(&index);
+                    drawind_thread3 = std::thread::spawn(move || {
+                        let mut index_in = data.lock().unwrap();
+                        *index_in = match *index_in {
+                            usize::MAX => 0,
+                            num => num + 1,
+                        };
+                    });
+                    // println!("Main Events Cleared");
+                    playground.window.request_redraw();
+            },
+            Event::RedrawRequested(some) => {
+                let data = std::sync::Arc::clone(&drawing);
+                    let internal_drawing;
+                    // println!("trying to draw!");
+                    {
+                        let mut is_drawing = data.lock().unwrap();
+                        if !*is_drawing {
+                            // std::thread::sleep(std::time::Duration::new(0, 1_000_000));
+                            *is_drawing = true;
+                            internal_drawing = true;
+                            // println!("will draw!");
+                            let datai = std::sync::Arc::clone(&true_index);
+                            drawind_thread2 = std::thread::spawn(move || {
+                                let mut index_in = datai.lock().unwrap();
+                                *index_in = match *index_in {
+                                    usize::MAX => 0,
+                                    num => num + 1,
+                                };
+                            });
+                        } else {
+                            internal_drawing = false;
+                            // println!("nice try!");
+                        }
+                    }
+                    if !internal_drawing {
+                        playground.uniforms.time = instant.elapsed().as_secs_f32();
+                        queue.write_buffer(&uniforms_buffer, 0, playground.uniforms.as_bytes());
+                        let output_frame = playground.surface.get_current_frame().unwrap();
+                        let view = output_frame
+                            .output
+                            .texture
+                            .create_view(&wgpu::TextureViewDescriptor::default());
 
-        event_loop.run(move |event, _, control_flow| {
-            // *control_flow = ControlFlow::Wait;
-            *control_flow = ControlFlow::Poll;
-            match event {
-                
-        });
+                        let mut encoder = playground
+                            .device
+                            .create_command_encoder(&CommandEncoderDescriptor { label: None });
+
+                        {
+                            let mut render_pass =
+                                encoder.begin_render_pass(&RenderPassDescriptor {
+                                    label: None,
+                                    color_attachments: &[RenderPassColorAttachment {
+                                        view: &view,
+                                        resolve_target: None,
+                                        ops: Operations {
+                                            load: LoadOp::Clear(wgpu::Color::BLACK),
+                                            store: true,
+                                        },
+                                    }],
+                                    depth_stencil_attachment: None,
+                                });
+                            render_pass.set_pipeline(&playground.render_pipeline);
+                            render_pass.set_bind_group(0, &uniforms_buffer_bind_group, &[]);
+                            render_pass.draw(0..3, 0..1);
+                        }
+
+                        queue.submit(Some(encoder.finish()));
+                        let data2 = std::sync::Arc::clone(&drawing);
+                        drawind_thread = std::thread::spawn(move || {
+                            // std::thread::sleep(std::time::Duration::new(0, 500_000_000));
+                            let mut is_drawing2 = data2.lock().unwrap();
+                            *is_drawing2 = false;
+                        });
+                    }
+                    },
+            Event::RedrawEventsCleared => (),
+            Event::LoopDestroyed => (),
+        }
+        // *control_flow = ControlFlow::Poll;
+        *control_flow = ControlFlow::Wait;
+        // *control_flow = ControlFlow::WaitUntil(Instant::now() + Duration::from_millis(10000));
+        // *control_flow = ControlFlow::Exit;
+    });
+
+
     }
 }
