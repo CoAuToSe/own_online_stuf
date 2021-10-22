@@ -1,7 +1,10 @@
-use clap::Clap;
+#![allow(unused_variables)]
+#![windows_subsystem = "windows"]//remove the console when launched
+use clap::Parser;
 use futures::executor::block_on;
 use notify::{RawEvent, RecommendedWatcher, Watcher};
 use std::{
+    self,
     borrow::Cow,
     fs::{read_to_string, OpenOptions},
     io::Write,
@@ -9,7 +12,8 @@ use std::{
     path::{Path, PathBuf},
     sync::mpsc::channel,
     thread::JoinHandle,
-    time::Instant,
+    time::{Duration, Instant},
+    *,
 };
 use wgpu::{
     self,
@@ -25,16 +29,23 @@ use wgpu_subscriber;
 use winit::{
     self,
     dpi::PhysicalSize,
-    event::WindowEvent,
+    event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop, EventLoopProxy},
     window::{Window, WindowBuilder},
     *,
 };
 
 #[derive(Debug)]
+enum CustomEvent<'a> {
+    Som(winit::event::Event<'a, DeviceEvent>),
+    Non,
+}
+
+#[derive(Debug)]
 struct Reload;
 
-#[derive(Clap)]
+#[derive(Parser, Debug)]
+#[clap(name = "basic")]
 struct Opts {
     wgsl_file: PathBuf,
 
@@ -85,7 +96,7 @@ struct Playground {
 
 impl Playground {
     fn reload(&mut self) {
-        println!("Reload. {:?} {:?}", &self.watch_path, &self.flicker);
+        // println!("Reload. {:?} {:?}", &self.watch_path, &self.flicker);
         self.flicker = match self.flicker {
             255 => 0,
             num => num + 1,
@@ -107,7 +118,7 @@ impl Playground {
             temp_pathbuf,
         ) {
             Ok(render_pipeline) => self.render_pipeline = render_pipeline,
-            Err(e) => println!("{}", e),
+            Err(e) => ()//println!("{}", e),
         }
         self.window.request_redraw();
     }
@@ -130,8 +141,8 @@ impl Playground {
                 }) => {
                     proxy.send_event(Reload).unwrap();
                 }
-                Ok(event) => println!("broken event: {:?}", event),
-                Err(e) => println!("watch error: {:?}", e),
+                Ok(event) => (),//println!("broken event: {:?}", event),
+                Err(e) => ()//println!("watch error: {:?}", e),
             }
         }
     }
@@ -139,8 +150,14 @@ impl Playground {
     async fn get_async_stuff(instance: &Instance, surface: &Surface) -> (Adapter, Device, Queue) {
         let adapter = instance
             .request_adapter(&RequestAdapterOptions {
+                // // /// Adapter that uses the least possible power. This is often an integrated GPU.
+                // // LowPower = 0,
+                // power_preference: wgpu::PowerPreference::LowPower,
+                // /// Adapter that has the highest performance. This is often a discrete GPU.
+                // HighPerformance = 1,
                 power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(surface),
+                // force_fallback_adapter: false, //default
             })
             .await
             .unwrap();
@@ -169,7 +186,7 @@ impl Playground {
             &self.watch_path,
         ) {
             Ok(render_pipeline) => self.render_pipeline = render_pipeline,
-            Err(e) => println!("{}", e),
+            Err(e) => ()//println!("{}", e),
         }
     }
 
@@ -288,7 +305,7 @@ impl Playground {
         ) {
             Ok(render_pipeline) => render_pipeline,
             Err(e) => {
-                println!("Could not start due to error: {}", &e);
+                // println!("Could not start due to error: {}", &e);
                 return;
             }
         };
@@ -358,14 +375,14 @@ impl Playground {
                 let index_in = data.lock().unwrap();
                 let timer_in = data2.lock().unwrap();
                 let true_index_in = data3.lock().unwrap();
-                println!(
-                    "{} | {}: {} | {}: {}",
-                    *timer_in,
-                    *index_in,
-                    *index_in / *timer_in,
-                    *true_index_in,
-                    *true_index_in / *timer_in,
-                );
+                // println!(
+                //     "{} | {}: {} | {}: {}",
+                //     *timer_in,
+                //     *index_in,
+                //     *index_in / *timer_in,
+                //     *true_index_in,
+                //     *true_index_in / *timer_in,
+                // );
             }
             std::thread::sleep(std::time::Duration::new(0, 1_000_000_000));
         });
@@ -476,7 +493,7 @@ impl Playground {
     }
 }
 
-fn main() {
+fn second_main() {
     wgpu_subscriber::initialize_default_subscriber(None);
     let opts = Opts::parse();
 
@@ -488,14 +505,132 @@ fn main() {
         {
             file
         } else {
-            println!(
-                "Couldn't create file {:?}, make sure it doesn't already exist.",
-                &opts.wgsl_file
-            );
+            // println!(
+            //     "Couldn't create file {:?}, make sure it doesn't already exist.",
+            //     &opts.wgsl_file
+            // );
             return;
         };
         file.write_all(include_bytes!("frag.default.wgsl")).unwrap();
     }
 
     Playground::run(&opts);
+}
+
+fn main() {
+    // println!("Hello, world!");
+    let event_loop = event_loop::EventLoop::<CustomEvent>::with_user_event();
+    let my_window = window::WindowBuilder::new()
+        .with_always_on_top(false)
+        .with_decorations(true)
+        .with_fullscreen(None)
+        .with_inner_size(dpi::LogicalSize::new(200, 200))
+        .with_max_inner_size(dpi::LogicalSize::new(1000, 1000))
+        .with_maximized(false)
+        .with_position(dpi::LogicalPosition::new(100, 100))
+        .with_resizable(true)
+        .with_title("My Title")
+        .with_transparent(false)
+        .with_visible(true)
+        .with_window_icon(None)
+        .build(&event_loop)
+        .unwrap();
+    //
+    let event_loop_proxy = event_loop.create_proxy();
+    std::thread::spawn(move || loop {
+        std::thread::sleep(Duration::new(5, 0));
+        event_loop_proxy
+            .send_event(CustomEvent::Som(winit::event::Event::DeviceEvent {
+                device_id: unsafe { winit::event::DeviceId::dummy() },
+                event: winit::event::DeviceEvent::MouseMotion { delta: (0.0, 10.0) },
+            }))
+            .ok();
+
+        event_loop_proxy
+            .send_event(CustomEvent::Som(winit::event::Event::WindowEvent {
+                window_id: my_window.id(),
+                event: winit::event::WindowEvent::Focused(true),
+            }))
+            .ok();
+    });
+
+    event_loop.run(move |event, something, control_flow| {
+        // println!("{:?} {:?} {:?}", event, something, control_flow);
+        match event {
+            Event::NewEvents(some) => (),
+            Event::WindowEvent { window_id, event } => match event {
+                event::WindowEvent::Resized(some) => (),
+                event::WindowEvent::Moved(some) => (),
+                event::WindowEvent::CloseRequested => (),
+                event::WindowEvent::Destroyed => *control_flow = ControlFlow::Exit,
+                event::WindowEvent::DroppedFile(some) => (),
+                event::WindowEvent::HoveredFile(some) => (),
+                event::WindowEvent::HoveredFileCancelled => (),
+                event::WindowEvent::ReceivedCharacter(some) => (),
+                event::WindowEvent::Focused(some) => (),
+                event::WindowEvent::KeyboardInput {
+                    device_id,
+                    input,
+                    is_synthetic,
+                } => (),
+                event::WindowEvent::ModifiersChanged(some) => (),
+                event::WindowEvent::CursorMoved {
+                    device_id,
+                    position,
+                    modifiers,
+                } => (),
+                event::WindowEvent::CursorEntered { device_id } => (),
+                event::WindowEvent::CursorLeft { device_id } => (),
+                event::WindowEvent::MouseWheel {
+                    device_id,
+                    delta,
+                    phase,
+                    modifiers,
+                } => (),
+                event::WindowEvent::MouseInput {
+                    device_id,
+                    state,
+                    button,
+                    modifiers,
+                } => (),
+                event::WindowEvent::TouchpadPressure {
+                    device_id,
+                    pressure,
+                    stage,
+                } => (),
+                event::WindowEvent::AxisMotion {
+                    device_id,
+                    axis,
+                    value,
+                } => (),
+                event::WindowEvent::Touch(some) => (),
+                event::WindowEvent::ScaleFactorChanged {
+                    scale_factor,
+                    new_inner_size,
+                } => (),
+                event::WindowEvent::ThemeChanged(some) => (),
+            },
+            Event::DeviceEvent { device_id, event } => match event {
+                DeviceEvent::Added => (),
+                DeviceEvent::Removed => (),
+                DeviceEvent::MouseMotion { delta } => (),
+                DeviceEvent::MouseWheel { delta } => (),
+                DeviceEvent::Motion { axis, value } => (),
+                DeviceEvent::Button { button, state } => (),
+                DeviceEvent::Key(some) => (),
+                DeviceEvent::Text { codepoint } => (),
+            },
+            Event::UserEvent(some) => (),
+            Event::Suspended => (),
+            Event::Resumed => (),
+            Event::MainEventsCleared => (),
+            Event::RedrawRequested(some) => (),
+            Event::RedrawEventsCleared => (),
+            Event::LoopDestroyed => (),
+        }
+        // *control_flow = ControlFlow::Poll;
+        *control_flow = ControlFlow::Wait;
+        // *control_flow = ControlFlow::WaitUntil(Instant::now() + Duration::from_millis(10000));
+        // *control_flow = ControlFlow::Exit;
+    });
 }

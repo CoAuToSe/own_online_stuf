@@ -1,5 +1,5 @@
 // #![allow(unused_variables)]
-use clap::Clap;
+use clap::Parser;
 use futures::executor::block_on;
 use notify::{RawEvent, RecommendedWatcher, Watcher};
 use std::{
@@ -11,8 +11,8 @@ use std::{
     path::{Path, PathBuf},
     sync::mpsc::channel,
     thread::JoinHandle,
-    time::{Instant, Duration},
-    *
+    time::{Duration, Instant},
+    *,
 };
 use wgpu::{
     self,
@@ -22,19 +22,17 @@ use wgpu::{
     DeviceDescriptor, Features, Instance, Limits, LoadOp, Operations, PipelineLayout,
     PrimitiveState, Queue, RenderPassColorAttachment, RenderPassDescriptor, RenderPipeline,
     RequestAdapterOptions, ShaderModule, ShaderSource, ShaderStages, Surface, SurfaceConfiguration,
-    TextureFormat,
-    *
+    TextureFormat, *,
 };
 use wgpu_subscriber;
 use winit::{
     self,
-    event::{DeviceEvent, Event, WindowEvent},
     dpi::PhysicalSize,
+    event::{DeviceEvent, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop, EventLoopProxy},
     window::{Window, WindowBuilder},
     *,
 };
-
 
 #[derive(Debug)]
 enum CustomEvent<'a> {
@@ -42,12 +40,11 @@ enum CustomEvent<'a> {
     Non,
 }
 
-
-
 #[derive(Debug)]
 struct Reload;
 
-#[derive(Clap)]
+#[derive(Parser, Debug)]
+#[clap(name = "basic")]
 struct Opts {
     wgsl_file: PathBuf,
 
@@ -152,8 +149,14 @@ impl Playground {
     async fn get_async_stuff(instance: &Instance, surface: &Surface) -> (Adapter, Device, Queue) {
         let adapter = instance
             .request_adapter(&RequestAdapterOptions {
+                // // /// Adapter that uses the least possible power. This is often an integrated GPU.
+                // // LowPower = 0,
+                // power_preference: wgpu::PowerPreference::LowPower,
+                // /// Adapter that has the highest performance. This is often a discrete GPU.
+                // HighPerformance = 1,
                 power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(surface),
+                force_fallback_adapter: false, //default
             })
             .await
             .unwrap();
@@ -312,7 +315,7 @@ impl Playground {
             width: size.width,
             height: size.height,
             present_mode: wgpu::PresentMode::Mailbox, // Vsync or better (try 60fps or more if possible (overkill))
-            // present_mode: wgpu::PresentMode::Fifo, // Vsync (try to have 60 fps)
+                                                      // present_mode: wgpu::PresentMode::Fifo, // Vsync (try to have 60 fps)
         };
 
         surface.configure(&device, &surface_config);
