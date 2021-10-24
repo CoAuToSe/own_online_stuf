@@ -198,7 +198,25 @@ impl Playground {
         swapchain_format: TextureFormat,
         frag_shader_path: &Path,
     ) -> core::result::Result<RenderPipeline, String> {
-        let frag_wgsl = read_to_string(&frag_shader_path).unwrap();
+        // let frag_wgsl = read_to_string(&frag_shader_path).unwrap();
+        let frag_wgsl = String::from(
+            "struct VertexOutput {
+    [[location(0)]] coord: vec2<f32>;
+    [[builtin(position)]] position: vec4<f32>;
+};
+
+[[stage(fragment)]]
+fn fs_main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
+    let r: f32 = dot(in.coord, in.coord);
+
+    if (r > .95) {
+        discard;
+    }
+
+    let normalized = (in.coord + vec2<f32>(1., 1.)) / 2.;
+    return vec4<f32>(normalized.rg, 0., 1.0);
+}",
+        );
 
         let fragement_shader_module = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
             label: Some("Fragment shader"),
@@ -333,7 +351,7 @@ impl Playground {
 
         let mut playground = Playground {
             watch_path: opts.wgsl_file.clone(),
-            watch_path2: "C:\\Users\\Aurel\\OneDrive\\Documents\\GitHub\\own_online_stuf\\wgsl-playground-main\\src\\somea.wgsl".into(),
+            watch_path2: " C:\\Users\\Aurélien\\Documents\\dev\\own_online_stuf\\wgsl-playground-main\\examples\\circle.wgsl".into(),
             render_pipeline,
             window,
             device,
