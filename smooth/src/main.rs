@@ -1,7 +1,6 @@
 #![allow(unused_variables)]
 // #![windows_subsystem = "windows"] //remove the console when launched
 use futures::executor::block_on;
-use notify::{RawEvent, RecommendedWatcher, Watcher};
 use std::{
     self,
     borrow::Cow,
@@ -24,7 +23,6 @@ use wgpu::{
     RequestAdapterOptions, ShaderModule, ShaderSource, ShaderStages, Surface, SurfaceConfiguration,
     TextureFormat, *,
 };
-use wgpu_subscriber;
 use winit::{
     self,
     dpi::PhysicalSize,
@@ -82,7 +80,7 @@ impl Uniforms {
 
 impl Playground {
     fn reload(&mut self) {
-        // println!("Reload. {:?} {:?}", &self.watch_path, &self.flicker);
+        println!("Reload. {:?}", &self.flicker);
         self.flicker = match self.flicker {
             255 => 0,
             num => num + 1,
@@ -101,7 +99,6 @@ impl Playground {
             &self.vertex_shader_module,
             &self.pipeline_layout,
             self.swapchain_format,
-            // &std::path::Path::new(""),
         ) {
             Ok(render_pipeline) => self.render_pipeline = render_pipeline,
             Err(e) => println!("{}", e),
@@ -250,14 +247,13 @@ async fn get_async_stuff(instance: &Instance, surface: &Surface) -> (Adapter, De
 
 fn main() {
     println!("Hello, world!");
-    // wgpu_subscriber::initialize_default_subscriber(None);
     let event_loop = event_loop::EventLoop::<CustomEvent>::with_user_event();
     let my_window = window::WindowBuilder::new()
         .with_always_on_top(false)
         .with_decorations(true)
         .with_fullscreen(None)
-        .with_inner_size(dpi::LogicalSize::new(200, 200))
-        .with_max_inner_size(dpi::LogicalSize::new(1000, 1000))
+        .with_inner_size(dpi::LogicalSize::new(1000, 1000))
+        .with_max_inner_size(dpi::LogicalSize::new(1920, 1080))
         .with_maximized(false)
         .with_position(dpi::LogicalPosition::new(100, 100))
         .with_resizable(true)
@@ -340,7 +336,6 @@ fn main() {
         &vertex_shader_module,
         &pipeline_layout,
         swapchain_format,
-        // &std::path::Path::new("C:\\"),
     ) {
         Ok(render_pipeline) => render_pipeline,
         Err(e) => {
