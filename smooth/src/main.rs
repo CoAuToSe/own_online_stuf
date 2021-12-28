@@ -252,7 +252,7 @@ fn main() {
         .with_always_on_top(false)
         .with_decorations(true)
         .with_fullscreen(None)
-        .with_inner_size(dpi::LogicalSize::new(1000, 1000))
+        .with_inner_size(dpi::LogicalSize::new(500, 500))
         .with_max_inner_size(dpi::LogicalSize::new(1920, 1080))
         .with_maximized(false)
         .with_position(dpi::LogicalPosition::new(100, 100))
@@ -423,9 +423,9 @@ fn main() {
         std::thread::sleep(std::time::Duration::new(0, 1_000_000_000));
     });
     event_loop.run(move |event, something, control_flow| {
-        // println!("{:?} {:?} {:?}", event, something, control_flow);
-        *control_flow = ControlFlow::Poll;
-        // *control_flow = ControlFlow::Wait;
+        println!("{:?} {:?} {:?}", event, something, control_flow);
+        // *control_flow = ControlFlow::Poll;
+        *control_flow = ControlFlow::Wait;
         // *control_flow = ControlFlow::WaitUntil(Instant::now() + Duration::from_millis(10000));
         // *control_flow = ControlFlow::Exit;
         match event {
